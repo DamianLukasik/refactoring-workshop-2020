@@ -16,6 +16,12 @@ UnexpectedEventException::UnexpectedEventException()
     : std::runtime_error("Unexpected event received!")
 {}
 
+template <class T, class A, class B>
+void createObjectByMakePair(T &obj, A a, B b)
+{
+    obj = std::make_pair(a, b);
+}
+
 Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config)
     : m_displayPort(p_displayPort),
       m_foodPort(p_foodPort),
@@ -29,8 +35,8 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
     istr >> w >> width >> height >> f >> foodX >> foodY >> s;
 
     if (w == 'W' and f == 'F' and s == 'S') {
-        m_mapDimension = std::make_pair(width, height);
-        m_foodPosition = std::make_pair(foodX, foodY);
+        createObjectByMakePair(m_mapDimension,width, height);
+        createObjectByMakePair(m_foodPosition,foodX,foodY);
 
         istr >> d;
         switch (d) {
@@ -159,7 +165,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                     m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewFood));
                 }
 
-                m_foodPosition = std::make_pair(receivedFood.x, receivedFood.y);
+                createObjectByMakePair(m_foodPosition,receivedFood.x,receivedFood.y);
 
             } catch (std::bad_cast&) {
                 try {
@@ -183,7 +189,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                         m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewFood));
                     }
 
-                    m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
+                    createObjectByMakePair(m_foodPosition,requestedFood.x, requestedFood.y);
                 } catch (std::bad_cast&) {
                     throw UnexpectedEventException();
                 }
