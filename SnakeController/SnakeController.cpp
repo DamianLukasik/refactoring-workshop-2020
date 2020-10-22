@@ -22,6 +22,17 @@ void createObjectByMakePair(T &obj, A a, B b)
     obj = std::make_pair(a, b);
 }
 
+template <class T, class P1, class P2>
+DisplayInd createNewDisplayInd(T &port, P1 &x, P2 &y)
+{
+    DisplayInd placeNewFood;
+    placeNewFood.x = x;
+    placeNewFood.y = y;
+    placeNewFood.value = Cell_FOOD;
+    port.send(std::make_unique<EventT<DisplayInd>>(placeNewFood));
+    return placeNewFood;
+}
+
 Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config)
     : m_displayPort(p_displayPort),
       m_foodPort(p_foodPort),
@@ -151,18 +162,9 @@ void Controller::receive(std::unique_ptr<Event> e)
 
                 if (requestedFoodCollidedWithSnake) {
                     m_foodPort.send(std::make_unique<EventT<FoodReq>>());
-                } else {
-                    DisplayInd clearOldFood;
-                    clearOldFood.x = m_foodPosition.first;
-                    clearOldFood.y = m_foodPosition.second;
-                    clearOldFood.value = Cell_FREE;
-                    m_displayPort.send(std::make_unique<EventT<DisplayInd>>(clearOldFood));
-
-                    DisplayInd placeNewFood;
-                    placeNewFood.x = receivedFood.x;
-                    placeNewFood.y = receivedFood.y;
-                    placeNewFood.value = Cell_FOOD;
-                    m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewFood));
+                } else {                    
+                    DisplayInd clearOldFood = createNewDisplayInd(m_displayPort,receivedFood.x,receivedFood.y);
+                    DisplayInd placeNewFood = createNewDisplayInd(m_displayPort,m_foodPosition.first,m_foodPosition.second);
                 }
 
                 createObjectByMakePair(m_foodPosition,receivedFood.x,receivedFood.y);
@@ -182,11 +184,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                     if (requestedFoodCollidedWithSnake) {
                         m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                     } else {
-                        DisplayInd placeNewFood;
-                        placeNewFood.x = requestedFood.x;
-                        placeNewFood.y = requestedFood.y;
-                        placeNewFood.value = Cell_FOOD;
-                        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewFood));
+                        DisplayInd placeNewFood = createNewDisplayInd(m_displayPort,requestedFood.x,requestedFood.y);
                     }
 
                     createObjectByMakePair(m_foodPosition,requestedFood.x, requestedFood.y);
