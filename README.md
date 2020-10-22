@@ -1,2 +1,2 @@
 # refactoring-workshop-2019
-# damian
+# damian lukasik
