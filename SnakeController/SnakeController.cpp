@@ -22,13 +22,13 @@ void createObjectByMakePair(T &obj, A a, B b)
     obj = std::make_pair(a, b);
 }
 
-template <class T, class P1, class P2>
-DisplayInd createNewDisplayInd(T &port, P1 &x, P2 &y)
+template <class T, class P1, class P2, class C>
+DisplayInd createNewDisplayInd(T &port, P1 &x, P2 &y, C &cell)
 {
     DisplayInd placeNewFood;
     placeNewFood.x = x;
     placeNewFood.y = y;
-    placeNewFood.value = Cell_FOOD;
+    placeNewFood.value = cell;
     port.send(std::make_unique<EventT<DisplayInd>>(placeNewFood));
     return placeNewFood;
 }
@@ -163,8 +163,8 @@ void Controller::receive(std::unique_ptr<Event> e)
                 if (requestedFoodCollidedWithSnake) {
                     m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                 } else {                    
-                    DisplayInd clearOldFood = createNewDisplayInd(m_displayPort,receivedFood.x,receivedFood.y);
-                    DisplayInd placeNewFood = createNewDisplayInd(m_displayPort,m_foodPosition.first,m_foodPosition.second);
+                    DisplayInd clearOldFood = createNewDisplayInd(m_displayPort,receivedFood.x,receivedFood.y,Cell_FREE);
+                    DisplayInd placeNewFood = createNewDisplayInd(m_displayPort,m_foodPosition.first,m_foodPosition.second,Cell_FOOD);
                 }
 
                 createObjectByMakePair(m_foodPosition,receivedFood.x,receivedFood.y);
@@ -184,7 +184,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                     if (requestedFoodCollidedWithSnake) {
                         m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                     } else {
-                        DisplayInd placeNewFood = createNewDisplayInd(m_displayPort,requestedFood.x,requestedFood.y);
+                        DisplayInd placeNewFood = createNewDisplayInd(m_displayPort,requestedFood.x,requestedFood.y,Cell_FOOD);
                     }
 
                     createObjectByMakePair(m_foodPosition,requestedFood.x, requestedFood.y);
