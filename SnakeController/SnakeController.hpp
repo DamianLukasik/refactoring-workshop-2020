@@ -9,6 +9,7 @@
 
 class Event;
 class IPort;
+class Sender;
 
 namespace Snake
 {
@@ -25,7 +26,7 @@ struct UnexpectedEventException : std::runtime_error
 class Controller : public IEventHandler
 {
 public:
-    Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config);
+    Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config, Sender& sender);
 
     Controller(Controller const& p_rhs) = delete;
     Controller& operator=(Controller const& p_rhs) = delete;
@@ -36,6 +37,7 @@ private:
     IPort& m_displayPort;
     IPort& m_foodPort;
     IPort& m_scorePort;
+    Sender& sender;
 
     std::pair<int, int> m_mapDimension;
     std::pair<int, int> m_foodPosition;
@@ -65,8 +67,6 @@ private:
     bool isPositionOutsideMap(int x, int y) const;
 
     void updateFoodPosition(int x, int y, std::function<void()> clearPolicy);
-    void sendClearOldFood();
-    void sendPlaceNewFood(int x, int y);
 
     bool m_paused;
 };
